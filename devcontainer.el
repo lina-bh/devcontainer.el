@@ -4,7 +4,6 @@
 
 ;; Author: Lina Bhaile <emacs-devel@linabee.uk>
 ;; Version: 1.0
-;; Package-Requires: (tramp cl-lib)
 ;; Keywords: comm processes tools unix
 ;; URL: https://github.com/lina-bh/devcontainer.el
 
