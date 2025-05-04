@@ -131,8 +131,9 @@ Errors if the object's \"outcome\" field doesn't equal \"success\"."
 
 When prefixed, the root directory is read from the minibuffer.
 
-Errors if the given path is remote or \".devcontainer.json\" or
-\".devcontainer/devcontainer.json\" cannot be found."
+Errors if the given path is remote or \".devcontainer.json\",
+\".devcontainer/devcontainer.json\" or
+\".devcontainer/<subdir>/devcontainer.json\" cannot be found."
   (let ((path (if current-prefix-arg
                   (read-directory-name "Directory with .devcontainer.json: ")
                 (or (devcontainer--buffer-file-name)
@@ -146,6 +147,9 @@ Errors if the given path is remote or \".devcontainer.json\" or
      (or
       (locate-dominating-file path ".devcontainer/devcontainer.json")
       (locate-dominating-file path ".devcontainer.json")
+      (when-let* ((dir (locate-dominating-file path ".devcontainer"))
+                  ((file-expand-wildcards (file-name-concat dir ".devcontainer/*/devcontainer.json"))))
+        dir)
       (error "Could not locate devcontainer.json")))))
 
 (defun devcontainer--docker-path ()
