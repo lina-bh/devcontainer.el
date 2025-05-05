@@ -1,3 +1,9 @@
+This package is being merged
+============================
+
+I'm working on adding the features of this package to https://github.com/johannes-mueller/devcontainer.el. 
+You should use that instead.
+
 devcontainer.el
 ===============
 
