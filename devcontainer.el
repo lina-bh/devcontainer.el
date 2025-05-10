@@ -63,6 +63,11 @@ absolute path to \"devcontainer\"."
   :type '(list string)
   :group 'devcontainer)
 
+(defcustom devcontainer-ephemeral-modes '(eshell-mode vterm-mode)
+  "Major modes of ephemeral buffers to be killed when entering and leaving the devcontainer."
+  :group 'devcontainer
+  :type '(list symbol))
+
 (defun devcontainer--buffer-file-name (&optional buf)
   "Get a file name associated with BUF.  If BUF is nil consider the current buffer."
   (setq buf (or buf (current-buffer)))
@@ -77,6 +82,18 @@ absolute path to \"devcontainer\"."
                  (file-in-directory-p file-name dir))
         (push buf bufs)))
     bufs))
+
+(defun devcontainer--ephemeral-buffers (dir)
+  "Return a list of ephemeral buffers in DIR.
+
+An ephemeral buffer is one with a major mode named in
+`devcontainer-ephemeral-modes'."
+  (let (bufs)
+    (dolist (buf (buffer-list) bufs)
+      (with-current-buffer buf
+        (when (and (file-in-directory-p default-directory dir)
+                   (memq major-mode devcontainer-ephemeral-modes))
+          (push buf bufs))))))
 
 (defun devcontainer--remote-buffers (host)
   "Return a list of remote buffers on remote HOST."
@@ -124,8 +141,10 @@ Errors if the object's \"outcome\" field doesn't equal \"success\"."
                :host (plist-get object :containerId)
                :dir (plist-get object :remoteWorkspaceFolder))
             (devcontainer--save-and-kill-buffers
-             (devcontainer--local-buffers workspace-folder)))
         (error "Devcontainer-up did not succeed: %S" object)))))
+             (append
+              (devcontainer--local-buffers workspace-folder)
+              (devcontainer--ephemeral-buffers workspace-folder))))
 
 (defun devcontainer--local-workspace-folder ()
   "Get the local root of the workspace which contains the devcontainer config.
@@ -249,7 +268,10 @@ JSON-ARGS is passed to `json-parse-buffer' (which see)."
     (if vec
         (setq host (tramp-file-name-host vec))
       (error "Not inside a devcontainer buffer"))
-    (devcontainer--save-and-kill-buffers (devcontainer--remote-buffers host))
+    (devcontainer--save-and-kill-buffers
+     (append
+      (devcontainer--remote-buffers host)
+      (devcontainer--ephemeral-buffers default-directory)))
     (dired (gethash "devcontainer.local_folder"
                     (devcontainer--container-labels-tbl host)))
     (tramp-cleanup-connection vec)
