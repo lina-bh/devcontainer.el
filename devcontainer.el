@@ -133,18 +133,18 @@ Then, clean up the local buffers in WORKSPACE-FOLDER.
 Errors if the object's \"outcome\" field doesn't equal \"success\"."
   (lambda (proc out)
     ;; Plenty of bugs and missing checks here as it is.
-    (let ((object (json-parse-string out :object-type 'plist)))
-      (if (string-equal "success" (plist-get object :outcome))
+    (let-alist (json-parse-string out :object-type 'alist)
+      (if (string-equal "success" .outcome)
           (prog1
               (devcontainer--find-container-workspace
-               :user (plist-get object :remoteUser)
-               :host (plist-get object :containerId)
-               :dir (plist-get object :remoteWorkspaceFolder))
+               :user .remoteUser
+               :host .containerId
+               :dir .remoteWorkspaceFolder)
             (devcontainer--save-and-kill-buffers
-        (error "Devcontainer-up did not succeed: %S" object)))))
              (append
               (devcontainer--local-buffers workspace-folder)
               (devcontainer--ephemeral-buffers workspace-folder))))
+        (error "devcontainer up didn't succeed: %s" .description)))))
 
 (defun devcontainer--local-workspace-folder ()
   "Get the local root of the workspace which contains the devcontainer config.
