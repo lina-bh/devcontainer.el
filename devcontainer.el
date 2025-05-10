@@ -1,4 +1,4 @@
-;;; devcontainer.el --- Support for Visual Studio Code-compatible devcontainers (https://containers.dev/).  -*- lexical-binding: t; -*-
+;;; devcontainer.el --- Glue between devcontainers and tramp -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2025 Lina Bhaile
 
@@ -6,6 +6,7 @@
 ;; Version: 1.0
 ;; Keywords: comm processes tools unix
 ;; URL: https://github.com/lina-bh/devcontainer.el
+;; Package-Requires: ((emacs "30.1"))
 
 ;; This file is not part of GNU Emacs.
 
@@ -30,7 +31,9 @@
 (require 'cl-lib)
 (require 'tramp-container)
 
-(defgroup devcontainer nil "Support for Visual Studio Code-compatible devcontainers (https://containers.dev/).")
+(defgroup devcontainer nil
+  "Glue between devcontainers and Tramp."
+  :group 'comm)
 
 (defcustom devcontainer-engine "podman"
   "The container engine to use, one of \"podman\" or \"docker\".
@@ -90,11 +93,8 @@ absolute path to \"devcontainer\"."
     (save-buffer buf)
     (kill-buffer buf)))
 
-(cl-defun devcontainer--find-container-workspace (
-                                                  &key host
-                                                  &key user
-                                                  &key dir
-                                                  )
+(cl-defun devcontainer--find-container-workspace
+    (&key host &key user &key dir)
   "Call `dired' to edit the workspace root mounted inside the devcontainer.
 HOST is the container ID.
 USER is the user inside the container.
