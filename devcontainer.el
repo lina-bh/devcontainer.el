@@ -182,6 +182,7 @@ else `tramp-podman-program'."
         (run-mode-hooks)))
     buffer))
 
+;;;###autoload
 (defun devcontainer-up ()
   "Bring up a devcontainer."
   (interactive)
