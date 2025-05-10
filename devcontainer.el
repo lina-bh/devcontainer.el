@@ -30,6 +30,7 @@
 ;;; Code:
 (require 'cl-lib)
 (require 'tramp-container)
+(require 'shell)
 
 (defgroup devcontainer nil
   "Glue between devcontainers and Tramp."
@@ -176,10 +177,9 @@ else `tramp-podman-program'."
   (let ((buffer (get-buffer-create
                  (format "*devcontainer %s %s*" subcmd label))))
     (with-current-buffer buffer
-      ;;   (fundamental-mode)
-      ;;   (erase-buffer)
-      (run-mode-hooks)
-      (goto-char (point-min)))
+      (if (fboundp 'shell-command-mode)
+          (shell-command-mode)
+        (run-mode-hooks)))
     buffer))
 
 (defun devcontainer-up ()
